@@ -21,7 +21,7 @@ import com.adamin.androiddownloader.threadpoolexcutordemo.PriorityRunnable;
 import java.io.File;
 
 public class Main2Activity extends AppCompatActivity {
-    private final String music1 = "http://yuedu.fm/static/file/pod/a5aa751914ff8b20b0ad25af23ca62ad.mp3";
+    private final String music1 = "http://cdn1.mydown.yesky.com/579eca4b/64171bb138738e3a0b3e9945fed34f0a/soft/201604/app-tianji-release-2016-04-13-1.0.9.apk";
     private ProgressBar progressBar;
     private TextView textView;
     private Button button;
@@ -38,6 +38,28 @@ public class Main2Activity extends AppCompatActivity {
         progressBar = (ProgressBar) findViewById(R.id.progress);
         textView = (TextView) findViewById(R.id.tv_progress);
         button = (Button) findViewById(R.id.btn_dwn);
+        downloadTask=new DownloadTask(music1);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(ispause){
+                    ispause=false;
+                    if(downLoadService!=null){
+                        downLoadService.isPause=false;
+
+                    }
+                    new Thread(downloadTask).start();
+                    button.setText("暂停");
+                }else {
+                    ispause=true;
+                    if(downLoadService!=null){
+                        downLoadService.isPause=true;
+
+                    }
+                    button.setText("开始");
+                }
+            }
+        });
     }
 
 
@@ -53,37 +75,32 @@ public class Main2Activity extends AppCompatActivity {
                     if (progressBar.getMax() == progressBar.getProgress()) {
                         Toast.makeText(getApplicationContext(), "下载完成", Toast.LENGTH_LONG).show();
                     }
+                    break;
+                case 2:
+                    int progresslong=msg.arg1;
+                    progressBar.setMax(progresslong);
+                    break;
             }
         }
 
     }
 
     private final class DownloadTask implements Runnable {
+        private String url;
 
-        public DownloadTask(final String target) throws Exception {
-            if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-                final File destination = Environment.getExternalStorageDirectory();
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            downLoadService = new DownLoadService(target, destination, 3, getApplicationContext());
-                            progressBar.setMax(downLoadService.fileSize);
-
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }).start();
-
-            } else {
-                Toast.makeText(getApplicationContext(), "SD卡不存在或写保护!", Toast.LENGTH_LONG).show();
-            }
+        public DownloadTask(String url) {
+            this.url = url;
         }
 
         @Override
         public void run() {
             try {
+                File destinaton=Environment.getExternalStorageDirectory();
+                downLoadService=new DownLoadService(url,destinaton,3,getApplicationContext());
+                Message message=new Message();
+                message.what=2;
+                message.arg1=downLoadService.fileSize;
+                handler.sendMessage(message);
                 downLoadService.download(new DownLoadListener() {
                     @Override
                     public void onDownload(int downloaded_size) {

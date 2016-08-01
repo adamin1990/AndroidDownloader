@@ -89,7 +89,7 @@ public class DownLoadService {
      */
     private Map<Integer ,Integer> getDownLoadedLenth(String path){
         SQLiteDatabase database=dbHelper.getReadableDatabase();
-        String sql="SELECT theadId,downloadLength FROM downloadInfo WHERE downPath=?";
+        String sql="SELECT threadId,downloadLength FROM downloadInfo WHERE downPath=?";
     Cursor cursor= database.rawQuery(sql,new String[]{path});
         Map<Integer,Integer> data=new HashMap<>();
         while (cursor.moveToNext()){
@@ -121,7 +121,7 @@ public class DownLoadService {
         try {
             db.beginTransaction();
             for (ThreadDownload thread : threadDownloads) {
-                String sql = "UPDATE fileDownloading SET downloadLength=? WHERE threadId=? AND downPath=?";
+                String sql = "UPDATE downloadInfo SET downloadLength=? WHERE threadId=? AND downPath=?";
                 db.execSQL(sql, new String[] { thread.currentDownSize + "", thread.threadId + "", path });
             }
             db.setTransactionSuccessful();

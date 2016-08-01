@@ -59,7 +59,7 @@ public class ThreadDownload implements Runnable {
             isFinished=true;
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException("文件下载失败");
+            throw new RuntimeException("文件下载失败"+e.getMessage());
         }
 
     }
